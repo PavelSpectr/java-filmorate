@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 public class IsAfterValidation implements ConstraintValidator<IsAfter, LocalDate> {
     private LocalDate date;
+
     @Override
     public void initialize(IsAfter constraintAnnotation) {
         //ConstraintValidator.super.initialize(constraintAnnotation);
@@ -14,7 +15,7 @@ public class IsAfterValidation implements ConstraintValidator<IsAfter, LocalDate
 
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        if(value == null) {
+        if (value == null) {
             return true;
         }
         return value.isAfter(date);
