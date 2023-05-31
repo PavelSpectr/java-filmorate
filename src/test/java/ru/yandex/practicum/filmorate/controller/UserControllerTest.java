@@ -17,6 +17,7 @@ class UserControllerTest {
     public void setUp() {
         userController = new UserController();
     }
+
     @Test
     void createUser() {
         User createdUser = userController.createUser(
