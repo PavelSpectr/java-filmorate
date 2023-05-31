@@ -27,7 +27,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         for (Integer id : films.keySet()) {
-            if(!Objects.equals(film.getId(), id)) {
+            if (!Objects.equals(film.getId(), id)) {
                 throw new ValidationException("Такого фильма не существует.");
             }
         }
