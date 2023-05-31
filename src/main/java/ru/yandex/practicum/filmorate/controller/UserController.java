@@ -28,7 +28,7 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) {
         for (Integer id : users.keySet()) {
-            if(user.getId() != id) {
+            if (!Objects.equals(user.getId(), id)) {
                 throw new ValidationException("Такого пользователя не существует.");
             }
         }

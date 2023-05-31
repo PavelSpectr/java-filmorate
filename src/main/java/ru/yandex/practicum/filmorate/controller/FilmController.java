@@ -12,7 +12,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private Map<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private int genId = 1;
 
     @PostMapping
@@ -27,7 +27,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         for (Integer id : films.keySet()) {
-            if(film.getId() != id) {
+            if(!Objects.equals(film.getId(), id)) {
                 throw new ValidationException("Такого фильма не существует.");
             }
         }
