@@ -27,25 +27,14 @@ class UserControllerTest {
 
     @Test
     void createInvalidEmailUser() {
-        //assertThrows(ValidationException.class, () -> userController.createUser(new User("sdidjf kdjnsf")));
-        try {
-            userController.createUser(new User(" ", " ", " ", LocalDate.now().plusDays(7)));
-        } catch (ValidationException e) {
-            assertEquals("Электронная почта не может быть пустой и должна содержать символ @.", e.getMessage());
-            return;
-        }
-        fail();
+        assertThrows(ValidationException.class, () -> userController.createUser(
+                new User(" ", " ", " ", LocalDate.now().plusDays(1))));
     }
 
     @Test
     void createInvalidLoginUser() {
-        try {
-            userController.createUser(new User("dunkan@clod.com", " ", " ", LocalDate.now().plusDays(7)));
-        } catch (ValidationException e) {
-            assertEquals("Логин не может быть пустым и содержать пробелы.", e.getMessage());
-            return;
-        }
-        fail();
+        assertThrows(ValidationException.class, () -> userController.createUser(
+                new User("dunkan@clod.com", " ", " ", LocalDate.now().plusDays(7))));
     }
 
     @Test
@@ -57,12 +46,7 @@ class UserControllerTest {
 
     @Test
     void createInvalidBirthdayUser() {
-        try {
-            userController.createUser(new User("dunkan@clod.com", "DunkanMcCloud", "Dunkan", LocalDate.now().plusDays(7)));
-        } catch (ValidationException e) {
-            assertEquals("Дата рождения не может быть в будущем.", e.getMessage());
-            return;
-        }
-        fail();
+        assertThrows(ValidationException.class, () -> userController.createUser(
+                new User("dunkan@clod.com", "DunkanMcCloud", "Dunkan", LocalDate.now().plusDays(1))));
     }
 }

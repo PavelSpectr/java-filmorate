@@ -11,9 +11,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = { IsAfterValidation.class })
-public @interface IsAfter {
-    String value();
+@Constraint(validatedBy = { AfterFirstFilmDateValidation.class })
+public @interface AfterFirstFilmDate {
+    String value() default "1895-12-27";
     String message() default "ERROR: Дата релиза — не может быть раньше 28 декабря 1895 года.";
 
     Class<?>[] groups() default { };

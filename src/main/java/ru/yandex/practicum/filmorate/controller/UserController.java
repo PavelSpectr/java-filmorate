@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class UserController {
     private int genId = 1;
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         isValid(user);
         user.setId(genId++);
         users.put(user.getId(), user);
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         for (Integer id : users.keySet()) {
             if (!Objects.equals(user.getId(), id)) {
                 throw new ValidationException("Такого пользователя не существует.");
@@ -53,9 +54,8 @@ public class UserController {
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            //throw new ValidationException("Имя для отображения может быть пустым — в таком случае будет использован логин.");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем.");
         }
     }
