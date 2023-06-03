@@ -10,10 +10,8 @@ import java.time.LocalDate;
 public class Film {
     private Integer id;
     @NotBlank
-    @NotNull
     private String name;
-    @NotNull
-    @Size(max = 200)
+    @Size(min = 1, max = 200)
     private String description;
     @AfterFirstFilmDate
     private LocalDate releaseDate;
