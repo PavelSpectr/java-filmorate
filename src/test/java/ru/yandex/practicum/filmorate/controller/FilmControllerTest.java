@@ -4,8 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +17,42 @@ class FilmControllerTest {
 
     @BeforeEach
     void setUp() {
-        //filmController = new FilmController();
+        filmController = new FilmController(new FilmService() {
+            @Override
+            public Set<Long> addLike(Long filmId, Long userId) {
+                return null;
+            }
+
+            @Override
+            public Set<Long> delLike(Long filmId, Long userId) {
+                return null;
+            }
+
+            @Override
+            public List<Film> getTopRatedFilms(Long count) {
+                return null;
+            }
+
+            @Override
+            public Film createFilm(Film film) {
+                return null;
+            }
+
+            @Override
+            public Film updateFilm(Film film) {
+                return null;
+            }
+
+            @Override
+            public List<Film> getAllFilms() {
+                return null;
+            }
+
+            @Override
+            public Film getFilmById(Long filmId) {
+                return null;
+            }
+        });
     }
 
     @Test
