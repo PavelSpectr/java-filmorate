@@ -5,10 +5,12 @@ import ru.yandex.practicum.filmorate.validator.AfterFirstFilmDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
-    private Integer id;
+    private Long id;
     @NotBlank
     private String name;
     @Size(min = 1, max = 200)
@@ -17,6 +19,8 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+
+    private final Set<Long> likes = new HashSet<>();
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
