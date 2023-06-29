@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface UserStorage {
     User createUser(User user);
+    @SuppressWarnings("checkstyle:EmptyLineSeparator")
     User updateUser(User user);
+    @SuppressWarnings("checkstyle:EmptyLineSeparator")
     List<User> getAllUsers();
+    @SuppressWarnings("checkstyle:EmptyLineSeparator")
     User getUserById(Long userId);
 }
