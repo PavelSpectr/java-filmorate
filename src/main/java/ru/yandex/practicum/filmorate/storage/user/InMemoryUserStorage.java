@@ -42,7 +42,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
-        if (userId == null || !users.containsKey(userId)) {
+        if (users.get(userId) == null || !users.containsKey(userId)) {
             throw new ValidationException("Пользователь не найден");
         }
         log.debug("Пользователь с id={} успешно найден", userId);

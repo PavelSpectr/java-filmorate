@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import ru.yandex.practicum.filmorate.validator.AfterFirstFilmDate;
 
 import javax.validation.constraints.*;
@@ -8,7 +11,9 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@RequiredArgsConstructor
+@Getter
+@Setter
 public class Film {
     private Long id;
     @NotBlank
