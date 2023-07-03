@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import ru.yandex.practicum.filmorate.validator.AfterFirstFilmDate;
 
@@ -11,7 +9,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
 public class Film {
@@ -27,6 +24,8 @@ public class Film {
 
     private final Set<Long> likes = new HashSet<>();
 
+    //Все таки явное объявление конструктора более кофортно, в плане понимания кода)
+    //Иначе приходится проверять все свойства, а делать все через сеттеры не очень удобно)
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
         this.description = description;
