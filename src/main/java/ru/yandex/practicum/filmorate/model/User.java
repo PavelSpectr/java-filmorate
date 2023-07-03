@@ -21,7 +21,7 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private final Set<Long> friends = new HashSet<>();
+    private Set<Long> friends = new HashSet<>();
 
     //Все таки явное объявление конструктора более кофортно, в плане понимания кода)
     //Иначе приходится проверять все свойства, а делать все через сеттеры не очень удобно)

@@ -21,7 +21,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
-
     private final Set<Long> likes = new HashSet<>();
 
     //Все таки явное объявление конструктора более кофортно, в плане понимания кода)
