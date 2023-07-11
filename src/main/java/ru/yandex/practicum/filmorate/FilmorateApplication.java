@@ -7,7 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FilmorateApplication {
 
 	public static void main(String[] args) {
+		//Оставлю бины, как напоминание для себя)
+		/*ApplicationContext context = */
 		SpringApplication.run(FilmorateApplication.class, args);
+		/*FilmController filmController = context.getBean(FilmController.class);
+		UserController userController = context.getBean(UserController.class);
+		ErrorHandler errorHandler = context.getBean(ErrorHandler.class);*/
 	}
 
 }
