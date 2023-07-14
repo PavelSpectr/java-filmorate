@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
     public class FilmMapper implements RowMapper<FilmColumn> {
+
         //Убрали все экземляры
         @Override
         public FilmColumn mapRow(ResultSet rs, int rowNum) throws SQLException {

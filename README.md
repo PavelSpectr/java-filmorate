@@ -5,7 +5,7 @@
     yandex, filmorate
     <br/>
     <br/>
-    <a href="https://github.com/alex-from-90/java-filmorate"><strong>Проект »</strong></a>
+    <a href="https://github.com/PavelSpectr/java-filmorate"><strong>Проект »</strong></a>
     <br/>
     <br/>
   </p>
