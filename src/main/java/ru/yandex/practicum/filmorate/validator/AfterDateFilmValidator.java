@@ -4,12 +4,12 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 
-public class AfterFirstFilmDateValidation implements ConstraintValidator<AfterFirstFilmDate, LocalDate> {
-    private LocalDate date;
+public class AfterDateFilmValidator implements ConstraintValidator<AfterDateFilm, LocalDate> {
+    private LocalDate afterDate;
 
     @Override
-    public void initialize(AfterFirstFilmDate constraintAnnotation) {
-        date = LocalDate.parse(constraintAnnotation.value());
+    public void initialize(AfterDateFilm constraintAnnotation) {
+        afterDate = LocalDate.parse(constraintAnnotation.value());
     }
 
     @Override
@@ -17,6 +17,6 @@ public class AfterFirstFilmDateValidation implements ConstraintValidator<AfterFi
         if (value == null) {
             return true;
         }
-        return value.isAfter(date);
+        return value.isAfter(afterDate);
     }
 }
