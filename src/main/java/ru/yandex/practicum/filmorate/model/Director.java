@@ -11,8 +11,12 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class Director {
     @EqualsAndHashCode.Include
-    private Long id;
+    private int id;
 
-    @NotBlank(message = "Имя режисера не должно быть пустым")
+    @NotBlank(message = "Имя не должно быть пустым")
     private String name;
+
+    public Director(String name) {
+        this.name = name;
+    }
 }

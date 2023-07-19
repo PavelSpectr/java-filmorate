@@ -33,7 +33,6 @@ public class Film {
     private Integer duration;
 
     private Set<Genre> genres;
-
     private Set<Director> directors = new HashSet<>();
     private MpaRating mpa;
 
