@@ -9,10 +9,10 @@ import javax.validation.constraints.NotBlank;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
-public class Genre {
+public class MpaRating {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @NotBlank(message = "Название жанра не должно быть пустым")
+    @NotBlank(message = "Наименование рейтинга не должно быть пустым")
     private String name;
 }
