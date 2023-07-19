@@ -1,50 +1,40 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.validator.AfterDateFilm;
+import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.validation.FilmMinReleaseDate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Film {
+    @EqualsAndHashCode.Include
     private Long id;
 
-    @NotNull(message = "У фильма должно быть имя")
-    @NotBlank(message = "Имя не может быть пустым")
+    @NotBlank(message = "Название не должно быть пустым")
     private String name;
 
-    @NotNull(message = "У фильма должно быть описание")
-    @Size(max = 200, message = "Описание не должно превышать 200 символов")
+    @Size(max = 200, message = "Длина описания не должна превышать 200 символов")
     private String description;
 
-    @NotNull(message = "У фильма должна быть указана продолжительность")
-    @Positive(message = "Продолжительность фильма не может быть отрицательной")
-    private Integer duration;
-
-    @NotNull(message = "У фильма должна быть указана дата релиза")
-    @AfterDateFilm(value = "1895-12-28", message = "Дата выхода должна быть после указанной даты")
+    @NotNull(message = "Дата релиза не должна быть пустой")
+    @FilmMinReleaseDate
     private LocalDate releaseDate;
 
-    @NotNull(message = "У фильма должен быть указан рейтинг MPA и жанр ")
-    private Mpa mpa;
-    private Set<Genre> genres = new HashSet<>();
+    @Positive(message = "Продолжительность фильма должна быть положительной")
+    @NotNull(message = "Продолжительность фильма не должна быть пустой")
+    private Integer duration;
 
-    private Set<Long> likes = new HashSet<>();
+    private Set<Genre> genres;
+    private Set<Director> directors = new HashSet<>();
+    private MpaRating mpa;
 
-    @JsonSetter
-    public void setGenres(Set<Genre> genres) {
-        this.genres = genres.stream()
-                .sorted(Comparator.comparingInt(Genre::getId))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
+    private int likesCount;
 }
