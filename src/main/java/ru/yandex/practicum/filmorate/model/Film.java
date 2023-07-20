@@ -32,6 +32,8 @@ public class Film {
     private Integer duration;
 
     private Set<Genre> genres;
+
+    private Set<Director> directors;
     private MpaRating mpa;
 
     private int likesCount;
