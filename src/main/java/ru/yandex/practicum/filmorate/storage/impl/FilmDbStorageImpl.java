@@ -53,7 +53,7 @@ public class FilmDbStorageImpl implements FilmStorage {
             "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
             "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
             "GROUP BY films.id";
-    private static final String SELECT_POPULAR_FILMS_QUERY = "SELECT " +
+    private static final String SELECT_POPULAR_FILMS_QUERY_1 = "SELECT " +
             "films.id, " +
             "films.name, " +
             "films.description, " +
@@ -63,16 +63,20 @@ public class FilmDbStorageImpl implements FilmStorage {
             "mpa.name AS mpa_rating_name, " +
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
             "COUNT(DISTINCT(film_likes.user_id)) AS likes_count " +
-            "FROM films " +
-            "JOIN film_genres AS fg ON films.id = fg.film_id AND fg.genre_id = ? " +
+            "FROM films ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_GENRE =
+            "JOIN film_genres AS fg ON films.id = fg.film_id AND fg.genre_id = ? ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_2 =
             "LEFT JOIN film_genres AS fgl ON films.id = fgl.film_id " +
-            "LEFT JOIN genres ON fgl.genre_id = genres.id " +
-            "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
-            "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
-            "WHERE EXTRACT(YEAR FROM films.release_date) = ? " +
+                    "LEFT JOIN genres ON fgl.genre_id = genres.id " +
+                    "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
+                    "LEFT JOIN film_likes ON films.id = film_likes.film_id ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_YEAR =
+            "WHERE EXTRACT(YEAR FROM films.release_date) = ? ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_3 =
             "GROUP BY films.id " +
-            "ORDER BY likes_count DESC " +
-            "LIMIT ? ";
+                    "ORDER BY likes_count DESC " +
+                    "LIMIT ? ";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration_minutes = ?, mpa_rating_id = ? WHERE id = ?";
     private static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     private static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
@@ -81,12 +85,9 @@ public class FilmDbStorageImpl implements FilmStorage {
     private static final String DELETE_FILM_LIKES_QUERY = "DELETE FROM film_likes WHERE user_id = ? AND film_id = ?";
 
     private static final String FILM_LIKES_EXIST_QUERY = "SELECT " +
-            "films.id, " +
-            "COUNT(DISTINCT(film_likes.user_id)) > 0 AS like_exist " +
-            "FROM films " +
-            "LEFT JOIN film_likes ON films.id = film_likes.film_id AND film_likes.user_id = ? " +
-            "WHERE films.id = ? " +
-            "GROUP BY films.id";
+            "film_likes.film_id " +
+            "FROM film_likes " +
+            "WHERE film_likes.film_id = ? AND film_likes.user_id = ?";
 
     @Override
     public Film getFilmById(Long filmId) {
@@ -103,16 +104,11 @@ public class FilmDbStorageImpl implements FilmStorage {
     }
 
     private boolean filmLikeExist(long filmId, long userId) {
-        Optional<Boolean> filmLikeExist = jdbcTemplate.query(FILM_LIKES_EXIST_QUERY, (rs, rowNum) -> rs.getBoolean("like_exist"), filmId, userId)
+        Optional<Long> filmLikeExist = jdbcTemplate.query(FILM_LIKES_EXIST_QUERY, (rs, rowNum) -> rs.getLong("film_id"), filmId, userId)
                 .stream()
                 .findFirst();
 
-        if (filmLikeExist.isEmpty()) {
-            log.error("Фильм #" + filmId + " не найден.");
-            throw new NotFoundException("Фильм #" + filmId + " не найден.");
-        }
-
-        return filmLikeExist.get();
+        return filmLikeExist.isPresent();
     }
 
     @Override
@@ -122,7 +118,25 @@ public class FilmDbStorageImpl implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
-        return jdbcTemplate.query(SELECT_POPULAR_FILMS_QUERY, filmRowMapper(), genreId, year, count);
+        String query = SELECT_POPULAR_FILMS_QUERY_1;
+        if (genreId != null) {
+            query += SELECT_POPULAR_FILMS_QUERY_GENRE;
+        }
+        query += SELECT_POPULAR_FILMS_QUERY_2;
+        if (year != null) {
+            query += SELECT_POPULAR_FILMS_QUERY_YEAR;
+        }
+        query += SELECT_POPULAR_FILMS_QUERY_3;
+        if (genreId != null && year != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), genreId, year, count);
+        }
+        if (genreId != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), genreId, count);
+        } else if (year != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), year, count);
+        } else {
+            return jdbcTemplate.query(query, filmRowMapper(), count);
+        }
     }
 
     @Override
@@ -188,7 +202,6 @@ public class FilmDbStorageImpl implements FilmStorage {
             log.error("Лайк пользователя #" + userId + " не найден.");
             throw new NotFoundException("Лайк пользователя #" + userId + " не найден.");
         }
-
         jdbcTemplate.update(DELETE_FILM_LIKES_QUERY, userId, filmId);
     }
 
