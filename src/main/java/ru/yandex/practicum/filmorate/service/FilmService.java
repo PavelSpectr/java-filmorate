@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.UserEventOperation;
+import ru.yandex.practicum.filmorate.model.UserEventType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserEventStorage;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,10 +20,13 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserEventStorage eventStorage;
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userEventDbStorage") UserEventStorage eventStorage) {
         this.filmStorage = filmStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Film getFilmById(Long filmId) {
@@ -60,12 +66,14 @@ public class FilmService {
     public void addLike(long filmId, long userId) {
         log.debug("+ addLike: filmId={}, userId={}", filmId, userId);
         filmStorage.addLike(filmId, userId);
+        eventStorage.addEvent(UserEventType.LIKE, UserEventOperation.ADD, userId, filmId);
         log.debug("- addLike: likes={}", getFilmById(filmId).getLikes());
     }
 
     public void removeLike(long filmId, long userId) {
         log.debug("+ removeLike filmId={}, userId={}", filmId, userId);
         filmStorage.removeLike(filmId, userId);
+        eventStorage.addEvent(UserEventType.LIKE, UserEventOperation.REMOVE, userId, filmId);
         log.debug("- removeLike: likes={}", getFilmById(filmId).getLikes());
     }
 

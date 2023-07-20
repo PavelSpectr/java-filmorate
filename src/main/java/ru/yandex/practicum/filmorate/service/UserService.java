@@ -4,6 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.model.UserEventOperation;
+import ru.yandex.practicum.filmorate.model.UserEventType;
+import ru.yandex.practicum.filmorate.storage.UserEventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
@@ -13,9 +17,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final UserEventStorage eventStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("userEventDbStorage") UserEventStorage eventStorage) {
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
     }
 
     public User getUserById(Long userId) {
@@ -57,6 +64,7 @@ public class UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         userStorage.addFriend(user.getId(), friend.getId());
+        eventStorage.addEvent(UserEventType.FRIEND, UserEventOperation.ADD, userId, friendId);
         log.debug("- addFriend");
     }
 
@@ -65,6 +73,7 @@ public class UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
         userStorage.removeFriend(user.getId(), friend.getId());
+        eventStorage.addEvent(UserEventType.FRIEND, UserEventOperation.REMOVE, userId, friendId);
         log.debug("- removeFriend");
     }
 
@@ -87,5 +96,13 @@ public class UserService {
         log.debug("- getFriendsByUserId: {}", friends);
 
         return friends;
+    }
+
+    public List<UserEvent> getEventsByUserId(long userId) {
+        log.debug("+ getEventsByUserId: userId={}", userId);
+        User user = getUserById(userId);
+        List<UserEvent> events = eventStorage.getEventsByUserId(user.getId());
+        log.debug("- getEventsByUserId: {}", events);
+        return events;
     }
 }
