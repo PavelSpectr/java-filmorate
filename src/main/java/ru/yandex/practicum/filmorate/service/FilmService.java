@@ -60,22 +60,19 @@ public class FilmService {
     public void addLike(long filmId, long userId) {
         log.debug("+ addLike: filmId={}, userId={}", filmId, userId);
         filmStorage.addLike(filmId, userId);
-        log.debug("- addLike: likes={}", getFilmById(filmId).getLikes());
+        log.debug("- addLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 
     public void removeLike(long filmId, long userId) {
         log.debug("+ removeLike filmId={}, userId={}", filmId, userId);
         filmStorage.removeLike(filmId, userId);
-        log.debug("- removeLike: likes={}", getFilmById(filmId).getLikes());
+        log.debug("- removeLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 
-    public List<Film> getMostPopularFilms(int count) {
+    public List<Film> getMostPopularFilms(int count, Long genreId, Integer year) {
         log.debug("+ getMostPopularFilms: {}", count);
 
-        List<Film> popularFilms = getFilms().stream()
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(Film::getLikesCount)))
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
 
         log.debug("- getMostPopularFilms: {}", popularFilms);
 
