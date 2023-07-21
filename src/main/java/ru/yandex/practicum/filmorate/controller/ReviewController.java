@@ -47,12 +47,12 @@ public class ReviewController {
 
     @PutMapping("/{reviewId}/dislike/{userId}")
     public void addDislike(@PathVariable Long reviewId, @PathVariable Long userId) {
-        reviewService.addDislike(reviewId, , userId);
+        reviewService.addDislike(reviewId, userId);
     }
 
     @DeleteMapping("/{reviewId}/like/{userId}")
     public void removeLike(Long reviewId, Long userId) {
-        reviewService.removeLike(reviewId, , userId);
+        reviewService.removeLike(reviewId, userId);
     }
 
     @DeleteMapping("/{reviewId}/dislike/{userId}")
