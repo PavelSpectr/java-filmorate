@@ -104,3 +104,5 @@ user_id integer not null references users on delete cascade,
 is_positive boolean not null,
 primary key (review_id, user_id)
 );
+
+ALTER TABLE reviews ALTER COLUMN useful SET DEFAULT 0;
