@@ -63,7 +63,7 @@ public class ReviewService {
     }
 
     public void addLike(Long review_id, Long user_id) {
-        log.debug("+ addLike: reviewId = {}, userId = {}", review_id, user_id);
+        log.debug("+  addLike: reviewId = {}, userId = {}", review_id, user_id);
         reviewStorage.addLike(review_id, user_id);
         log.debug("- addLike: reviewId = {}, userId = {}", review_id, user_id);
     }
