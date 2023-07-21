@@ -62,27 +62,27 @@ public class ReviewService {
         return reviewsOfFilm;
     }
 
-    public void addLike(Long review_id, Long user_id) {
-        log.debug("+ addLike: reviewId = {}, userId = {}", review_id, user_id);
-        reviewStorage.addLike(review_id, user_id);
-        log.debug("- addLike: reviewId = {}, userId = {}", review_id, user_id);
+    public void addLike(Long reviewId, Long userId) {
+        log.debug("+ addLike: reviewId = {}, userId = {}", reviewId, userId);
+        reviewStorage.addLike(reviewId, userId);
+        log.debug("- addLike: reviewId = {}, userId = {}", reviewId, userId);
     }
 
-    public void addDislike(Long review_id, Long user_id) {
-        log.debug("+ addDislike: reviewId = {}, userId = {}", review_id, user_id);
-        reviewStorage.addDislike(review_id, user_id);
-        log.debug("- addDislike: reviewId = {}, userId = {}", review_id, user_id);
+    public void addDislike(Long reviewId, Long userId) {
+        log.debug("+ addDislike: reviewId = {}, userId = {}", reviewId, userId);
+        reviewStorage.addDislike(reviewId, userId);
+        log.debug("- addDislike: reviewId = {}, userId = {}", reviewId, userId);
     }
 
-    public void removeLike(Long review_id, Long user_id) {
-        log.debug("+ removeLike: reviewId = {}, userId = {}", review_id, user_id);
-        reviewStorage.removeLike(review_id, user_id);
-        log.debug("- removeLike: reviewId = {}, userId = {}", review_id, user_id);
+    public void removeLike(Long reviewId, Long userId) {
+        log.debug("+ removeLike: reviewId = {}, userId = {}", reviewId, userId);
+        reviewStorage.removeLike(reviewId, userId);
+        log.debug("- removeLike: reviewId = {}, userId = {}", reviewId, userId);
     }
 
-    public void removeDislike(Long review_id, Long user_id) {
-        log.debug("+ removeDislike: reviewId = {}, userId = {}", review_id, user_id);
-        reviewStorage.removeDislike(review_id, user_id);
-        log.debug("- removeDislike: reviewId = {}, userId = {}", review_id, user_id);
+    public void removeDislike(Long reviewId, Long userId) {
+        log.debug("+ removeDislike: reviewId = {}, userId = {}", reviewId, userId);
+        reviewStorage.removeDislike(reviewId, userId);
+        log.debug("- removeDislike: reviewId = {}, userId = {}", reviewId, userId);
     }
 }
