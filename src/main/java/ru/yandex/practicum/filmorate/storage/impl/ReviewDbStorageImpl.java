@@ -114,24 +114,24 @@ public class ReviewDbStorageImpl implements ReviewStorage {
         return jdbcTemplate.query(SELECT_REVIEWS_OF_FILM_QUERY, reviewRowMapper(), filmId, count);
     }
 
-    public void addLike(Long review_id, Long user_id) {
-        jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, review_id, user_id, true);
-        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, review_id);
+    public void addLike(Long reviewId, Long userId) {
+        jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, reviewId, userId, true);
+        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, reviewId);
     }
 
-    public void addDislike(Long review_id, Long user_id) {
-        jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, review_id, user_id, false);
-        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, review_id);
+    public void addDislike(Long reviewId, Long userId) {
+        jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, reviewId, userId, false);
+        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, reviewId);
     }
 
-    public void removeLike(Long review_id, Long user_id) {
-        jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, review_id, user_id, true);
-        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, review_id);
+    public void removeLike(Long reviewId, Long userId) {
+        jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, reviewId, userId, true);
+        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, reviewId);
     }
 
-    public void removeDislike(Long review_id, Long user_id) {
-        jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, review_id, user_id, false);
-        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, review_id);
+    public void removeDislike(Long reviewId, Long userId) {
+        jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, reviewId, userId, false);
+        jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, reviewId);
     }
 
     private RowMapper<Review> reviewRowMapper() {
