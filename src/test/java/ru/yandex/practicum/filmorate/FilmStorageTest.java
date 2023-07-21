@@ -165,7 +165,7 @@ class FilmStorageTest {
         Film retrievedFilm = filmStorage.getFilmById(filmId);
 
         Assertions.assertNotNull(retrievedFilm);
-        Assertions.assertTrue(retrievedFilm.getLikes().contains(userId));
+        Assertions.assertEquals(retrievedFilm.getLikesCount(), 1);
     }
 
     @Test
@@ -192,6 +192,6 @@ class FilmStorageTest {
         Film retrievedFilm = filmStorage.getFilmById(filmId);
 
         Assertions.assertNotNull(retrievedFilm);
-        Assertions.assertFalse(retrievedFilm.getLikes().contains(userId));
+        Assertions.assertEquals(retrievedFilm.getLikesCount(), 0);
     }
 }
