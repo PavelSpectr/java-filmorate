@@ -12,13 +12,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("filmDbStorage")
@@ -35,7 +29,7 @@ public class FilmDbStorageImpl implements FilmStorage {
             "films.mpa_rating_id, " +
             "mpa.name AS mpa_rating_name, " +
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
-            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes " +
+            "COUNT(DISTINCT(film_likes.user_id)) AS likes_count " +
             "FROM films " +
             "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
             "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
@@ -52,19 +46,50 @@ public class FilmDbStorageImpl implements FilmStorage {
             "films.mpa_rating_id, " +
             "mpa.name AS mpa_rating_name, " +
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
-            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes " +
+            "COUNT(DISTINCT(film_likes.user_id)) AS likes_count " +
             "FROM films " +
             "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
             "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
             "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
             "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
             "GROUP BY films.id";
+    //Евгения: поле со списком лайков убрано за ненадобностью, добавлено вычисляемое поле likes_count
+    // todo при мерже с задачей по режиссерам в этот запрос также нужно будет добавить поле с режиссерами
+    private static final String SELECT_POPULAR_FILMS_QUERY_1 = "SELECT " +
+            "films.id, " +
+            "films.name, " +
+            "films.description, " +
+            "films.release_date, " +
+            "films.duration_minutes, " +
+            "films.mpa_rating_id, " +
+            "mpa.name AS mpa_rating_name, " +
+            "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
+            "COUNT(DISTINCT(film_likes.user_id)) AS likes_count " +
+            "FROM films ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_GENRE =
+            "JOIN film_genres AS fg ON films.id = fg.film_id AND fg.genre_id = ? ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_2 =
+            "LEFT JOIN film_genres AS fgl ON films.id = fgl.film_id " +
+                    "LEFT JOIN genres ON fgl.genre_id = genres.id " +
+                    "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
+                    "LEFT JOIN film_likes ON films.id = film_likes.film_id ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_YEAR =
+            "WHERE EXTRACT(YEAR FROM films.release_date) = ? ";
+    private static final String SELECT_POPULAR_FILMS_QUERY_3 =
+            "GROUP BY films.id " +
+                    "ORDER BY likes_count DESC " +
+                    "LIMIT ? ";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration_minutes = ?, mpa_rating_id = ? WHERE id = ?";
     private static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     private static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
     private static final String INSERT_FILM_LIKES_QUERY = "INSERT INTO film_likes (user_id, film_id) VALUES (?, ?)";
     private static final String DELETE_FILM_LIKES_QUERY = "DELETE FROM film_likes WHERE user_id = ? AND film_id = ?";
+
+    private static final String FILM_LIKES_EXIST_QUERY = "SELECT " +
+            "film_likes.film_id " +
+            "FROM film_likes " +
+            "WHERE film_likes.film_id = ? AND film_likes.user_id = ?";
 
     @Override
     public Film getFilmById(Long filmId) {
@@ -80,9 +105,46 @@ public class FilmDbStorageImpl implements FilmStorage {
         return film.get();
     }
 
+    // Евгения: поскольку список лайков убран за ненадобностью
+    // добавлена отдельная функция для проверки наличия лайка,
+    // это производительнее чем запрашивать фильм с прикрепленым
+    // к нему высляемым полем со списком лайков
+    private boolean filmLikeExist(long filmId, long userId) {
+        Optional<Long> filmLikeExist = jdbcTemplate.query(FILM_LIKES_EXIST_QUERY, (rs, rowNum) -> rs.getLong("film_id"), filmId, userId)
+                .stream()
+                .findFirst();
+
+        return filmLikeExist.isPresent();
+    }
+
     @Override
     public List<Film> getFilms() {
         return jdbcTemplate.query(SELECT_ALL_FILMS_QUERY, filmRowMapper());
+    }
+
+    // Евгения: из-за того что часть параметров не обязательная составляем SQL запрос
+    // из нескольких строковых костант
+    @Override
+    public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
+        String query = SELECT_POPULAR_FILMS_QUERY_1;
+        if (genreId != null) {
+            query += SELECT_POPULAR_FILMS_QUERY_GENRE;
+        }
+        query += SELECT_POPULAR_FILMS_QUERY_2;
+        if (year != null) {
+            query += SELECT_POPULAR_FILMS_QUERY_YEAR;
+        }
+        query += SELECT_POPULAR_FILMS_QUERY_3;
+        if (genreId != null && year != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), genreId, year, count);
+        }
+        if (genreId != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), genreId, count);
+        } else if (year != null) {
+            return jdbcTemplate.query(query, filmRowMapper(), year, count);
+        } else {
+            return jdbcTemplate.query(query, filmRowMapper(), count);
+        }
     }
 
     @Override
@@ -144,11 +206,10 @@ public class FilmDbStorageImpl implements FilmStorage {
 
     @Override
     public void removeLike(long filmId, long userId) {
-        if (!getFilmById(filmId).getLikes().contains(userId)) {
+        if (!filmLikeExist(filmId, userId)) {
             log.error("Лайк пользователя #" + userId + " не найден.");
             throw new NotFoundException("Лайк пользователя #" + userId + " не найден.");
         }
-
         jdbcTemplate.update(DELETE_FILM_LIKES_QUERY, userId, filmId);
     }
 
@@ -167,7 +228,7 @@ public class FilmDbStorageImpl implements FilmStorage {
             );
             film.setMpa(mpaRating);
             film.setGenres(parseGenres(rs.getString("genres")));
-            film.setLikes(parseLikes(rs.getString("likes")));
+            film.setLikesCount(rs.getInt("likes_count"));
 
             return film;
         };
@@ -188,13 +249,4 @@ public class FilmDbStorageImpl implements FilmStorage {
                 .collect(Collectors.toSet());
     }
 
-    private Set<Long> parseLikes(String likesString) {
-        if (Objects.isNull(likesString)) {
-            return Collections.emptySet();
-        }
-
-        return Arrays.stream(likesString.split(","))
-                .map(Long::parseLong)
-                .collect(Collectors.toSet());
-    }
 }
