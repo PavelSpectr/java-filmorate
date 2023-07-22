@@ -4,18 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorageImpl implements FilmStorage {
     private final Map<Long, Film> filmsData = new HashMap<>();
+
+    // Здесь за ключ будет ид фильма, а за значение будет ид пользователя
+    private final Set<AbstractMap.SimpleEntry<Long, Long>> likeStore = new HashSet<>();
 
     @Override
     public Film getFilmById(Long filmId) {
@@ -32,10 +33,39 @@ public class InMemoryFilmStorageImpl implements FilmStorage {
         return new ArrayList<>(filmsData.values());
     }
 
+    // Евгения: пришлось внести исправления что бы добиться обратной совместимости с интерфейсом
+    // и новой структурой Film
+    @Override
+    public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
+        return new ArrayList<>(filmsData.values()).stream().filter(film -> {
+                    if (genreId != null) {
+                        boolean isNoGenre = true;
+                        for (Genre genre : film.getGenres()) {
+                            if (genre.getId().equals(genreId)) {
+                                isNoGenre = false;
+                            }
+                        }
+                        if (isNoGenre) {
+                            return false;
+                        }
+                    }
+                    if (year != null) {
+                        if (film.getReleaseDate().getYear() == year) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .sorted(Collections.reverseOrder(Comparator.comparingInt(Film::getLikesCount)))
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public Long addFilm(Film film) {
         final Long id = filmsData.size() + 1L;
         film.setId(id);
+        film.setLikesCount(0);
         filmsData.put(id, film);
         return film.getId();
     }
@@ -55,30 +85,33 @@ public class InMemoryFilmStorageImpl implements FilmStorage {
         film.setDescription(updatedFilm.getDescription());
         film.setReleaseDate(updatedFilm.getReleaseDate());
         film.setDuration(updatedFilm.getDuration());
-        film.setLikes(updatedFilm.getLikes());
-
         return filmId;
     }
 
     @Override
     public void deleteFilm(long filmId) {
+        removeAllFilmLikes(filmId);
         filmsData.remove(filmId);
     }
 
     @Override
     public void addLike(long filmId, long userId) {
-        getFilmById(filmId).getLikes().add(userId);
+        getFilmById(filmId).setLikesCount(getFilmById(filmId).getLikesCount() + 1);
+        likeStore.add(new AbstractMap.SimpleEntry<>(filmId, userId));
+    }
+
+    private void removeAllFilmLikes(Long filmId) {
+        likeStore.removeIf(pair -> pair.getKey().equals(filmId));
     }
 
     @Override
     public void removeLike(long filmId, long userId) {
-        final Set<Long> likes = getFilmById(filmId).getLikes();
-
-        if (!likes.contains(userId)) {
+        if (!likeStore.contains(new AbstractMap.SimpleEntry<>(filmId, userId))) {
             log.error("Лайк пользователя #" + userId + " не найден.");
             throw new NotFoundException("Лайк пользователя #" + userId + " не найден.");
         }
-
-        likes.remove(userId);
+        getFilmById(filmId).setLikesCount(getFilmById(filmId).getLikesCount() - 1);
+        likeStore.remove(new AbstractMap.SimpleEntry<>(filmId, userId));
     }
+
 }
