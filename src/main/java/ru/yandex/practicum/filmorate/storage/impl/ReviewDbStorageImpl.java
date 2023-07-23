@@ -51,7 +51,8 @@ public class ReviewDbStorageImpl implements ReviewStorage {
             "user_id," +
             "film_id," +
             "useful FROM reviews " +
-            "ORDER BY useful DESC";
+            "ORDER BY useful DESC " +
+            "LIMIT ?";
 
     private static final String UPDATE_REVIEW_USEFUL_PLUS_QUERY = "UPDATE reviews SET useful = useful + 1" +
             " WHERE review_id = ?";
@@ -97,7 +98,6 @@ public class ReviewDbStorageImpl implements ReviewStorage {
     }
 
     public Review updateReview(Review review) {
-        getReviewById(review.getReviewId());
         jdbcTemplate.update(UPDATE_REVIEW_QUERY, review.getContent(), review.getIsPositive(), review.getReviewId());
         return getReviewById(review.getReviewId());
     }
@@ -107,11 +107,12 @@ public class ReviewDbStorageImpl implements ReviewStorage {
         jdbcTemplate.update(DELETE_REVIEW_QUERY, reviewId);
     }
 
-    public List<Review> getReviewsOfFilm(Long filmId, Long count) {
-        if (filmId == null) {
-            return jdbcTemplate.query(SELECT_ALL_REVIEWS_QUERY, reviewRowMapper());
-        }
+    public List<Review> getReviewsByFilmId(Long filmId, Long count) {
         return jdbcTemplate.query(SELECT_REVIEWS_OF_FILM_QUERY, reviewRowMapper(), filmId, count);
+    }
+
+    public List<Review> getReviews(Long count){
+        return jdbcTemplate.query(SELECT_ALL_REVIEWS_QUERY, reviewRowMapper(), count);
     }
 
     public void addLike(Long reviewId, Long userId) {

@@ -16,7 +16,7 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
 
     private final FilmStorage filmStorage;
-    @Qualifier("userDbStorage")
+
     private final UserStorage userStorage;
 
     public ReviewService(ReviewStorage reviewStorage, @Qualifier("filmDbStorage") FilmStorage filmStorage,
@@ -55,11 +55,16 @@ public class ReviewService {
         log.debug("+ deleteReview: reviewId={}", reviewId);
     }
 
-    public List<Review> getReviewsOfFilm(Long filmId, Long count) {
-        log.debug("+ getReviewsOfFilm: filmId={}, count={}", filmId, count);
-        List<Review> reviewsOfFilm = reviewStorage.getReviewsOfFilm(filmId, count);
-        log.debug("+ getReviewsOfFilm: ", reviewsOfFilm);
-        return reviewsOfFilm;
+    public List<Review> getReviews(Long filmId, Long count) {
+        List<Review> reviews;
+        log.debug("+ getReviews: filmId={}, count={}", filmId, count);
+        if (filmId == null){
+            reviews = reviewStorage.getReviews(count);
+        } else {
+            reviews = reviewStorage.getReviewsByFilmId(filmId, count);
+        }
+        log.debug("+ getReviews: ", reviews);
+        return reviews;
     }
 
     public void addLike(Long reviewId, Long userId) {
