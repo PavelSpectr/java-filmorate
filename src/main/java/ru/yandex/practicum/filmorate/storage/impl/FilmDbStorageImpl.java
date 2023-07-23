@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
@@ -35,12 +36,16 @@ public class FilmDbStorageImpl implements FilmStorage {
             "films.mpa_rating_id, " +
             "mpa.name AS mpa_rating_name, " +
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
-            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes " +
+            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes, " +
+            "GROUP_CONCAT(directors.id || ',' || directors.name separator ';') AS directors, " +
+            "COUNT(film_likes.user_id) AS likes_count " +
             "FROM films " +
             "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
             "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
             "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
             "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
+            "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
+            "LEFT JOIN directors ON film_directors.director_id = directors.id " +
             "WHERE films.id = ? " +
             "GROUP BY films.id";
     private static final String SELECT_ALL_FILMS_QUERY = "SELECT " +
@@ -52,16 +57,66 @@ public class FilmDbStorageImpl implements FilmStorage {
             "films.mpa_rating_id, " +
             "mpa.name AS mpa_rating_name, " +
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
-            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes " +
+            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes, " +
+            "GROUP_CONCAT(directors.id || ',' || directors.name separator ';') AS directors, " +
+            "COUNT(film_likes.user_id) AS likes_count " +
             "FROM films " +
             "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
             "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
             "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
             "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
+            "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
+            "LEFT JOIN directors ON film_directors.director_id = directors.id " +
             "GROUP BY films.id";
+    private static final String SELECT_FILM_BY_DIRECTOR_SORT_BY_LIKES_QUERY = "SELECT " +
+            "films.id, " +
+            "films.name, " +
+            "films.description, " +
+            "films.release_date, " +
+            "films.duration_minutes, " +
+            "films.mpa_rating_id, " +
+            "mpa.name AS mpa_rating_name, " +
+            "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
+            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes, " +
+            "GROUP_CONCAT(directors.id || ',' || directors.name separator ';') AS directors, " +
+            "COUNT(film_likes.user_id) AS likes_count " +
+            "FROM films " +
+            "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
+            "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
+            "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
+            "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
+            "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
+            "LEFT JOIN directors ON film_directors.director_id = directors.id " +
+            "WHERE film_directors.director_id = ? " +
+            "GROUP BY films.id " +
+            "ORDER BY likes_count DESC";
+    private static final String SELECT_FILM_BY_DIRECTOR_SORT_BY_YEAR_QUERY = "SELECT " +
+            "films.id, " +
+            "films.name, " +
+            "films.description, " +
+            "films.release_date, " +
+            "films.duration_minutes, " +
+            "films.mpa_rating_id, " +
+            "mpa.name AS mpa_rating_name, " +
+            "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
+            "GROUP_CONCAT(film_likes.user_id separator ',') AS likes, " +
+            "GROUP_CONCAT(directors.id || ',' || directors.name separator ';') AS directors, " +
+            "COUNT(film_likes.user_id) AS likes_count " +
+            "FROM films " +
+            "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
+            "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
+            "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
+            "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
+            "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
+            "LEFT JOIN directors ON film_directors.director_id = directors.id " +
+            "WHERE film_directors.director_id = ? " +
+            "GROUP BY films.id " +
+            "ORDER BY release_date";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration_minutes = ?, mpa_rating_id = ? WHERE id = ?";
     private static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+    private static final String INSERT_FILM_DIRECTORS_QUERY = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
     private static final String DELETE_FILM_GENRES_QUERY = "DELETE FROM film_genres WHERE film_id = ?";
+    private static final String DELETE_FILM_DIRECTORS_QUERY = "DELETE FROM film_directors WHERE film_id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
     private static final String INSERT_FILM_LIKES_QUERY = "INSERT INTO film_likes (user_id, film_id) VALUES (?, ?)";
     private static final String DELETE_FILM_LIKES_QUERY = "DELETE FROM film_likes WHERE user_id = ? AND film_id = ?";
@@ -110,6 +165,15 @@ public class FilmDbStorageImpl implements FilmStorage {
             ));
         }
 
+        Set<Director> directors = film.getDirectors();
+        if (Objects.nonNull(directors)) {
+            directors.forEach(director -> jdbcTemplate.update(
+                    INSERT_FILM_DIRECTORS_QUERY,
+                    filmId,
+                    director.getId()
+            ));
+        }
+
         return filmId;
     }
 
@@ -119,6 +183,7 @@ public class FilmDbStorageImpl implements FilmStorage {
 
         jdbcTemplate.update(UPDATE_FILM_QUERY, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), filmId);
         jdbcTemplate.update(DELETE_FILM_GENRES_QUERY, filmId);
+        jdbcTemplate.update(DELETE_FILM_DIRECTORS_QUERY, filmId);
 
         Set<Genre> genres = film.getGenres();
         if (Objects.nonNull(genres)) {
@@ -126,6 +191,15 @@ public class FilmDbStorageImpl implements FilmStorage {
                     INSERT_FILM_GENRES_QUERY,
                     filmId,
                     genre.getId()
+            ));
+        }
+
+        Set<Director> directors = film.getDirectors();
+        if (Objects.nonNull(directors)) {
+            directors.forEach(director -> jdbcTemplate.update(
+                    INSERT_FILM_DIRECTORS_QUERY,
+                    filmId,
+                    director.getId()
             ));
         }
 
@@ -152,6 +226,25 @@ public class FilmDbStorageImpl implements FilmStorage {
         jdbcTemplate.update(DELETE_FILM_LIKES_QUERY, userId, filmId);
     }
 
+    @Override
+    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        List<Film> filmsByDirector;
+
+        if (sortBy.equals("likes")) {
+            filmsByDirector = jdbcTemplate.query(SELECT_FILM_BY_DIRECTOR_SORT_BY_LIKES_QUERY, filmRowMapper(), directorId);
+        } else if (sortBy.equals("year")) {
+            filmsByDirector = jdbcTemplate.query(SELECT_FILM_BY_DIRECTOR_SORT_BY_YEAR_QUERY, filmRowMapper(), directorId);
+        } else {
+            throw new IllegalArgumentException("Неподдерживаемый параметр упорядочивания фильмов.");
+        }
+
+        if (filmsByDirector.isEmpty()) {
+            throw new NotFoundException("Режиссёр #" + directorId + " не найден.");
+        }
+
+        return filmsByDirector;
+    }
+
     private RowMapper<Film> filmRowMapper() {
         return (rs, rowNum) -> {
             Film film = new Film();
@@ -168,6 +261,7 @@ public class FilmDbStorageImpl implements FilmStorage {
             film.setMpa(mpaRating);
             film.setGenres(parseGenres(rs.getString("genres")));
             film.setLikes(parseLikes(rs.getString("likes")));
+            film.setDirectors(parseDirectors(rs.getString("directors")));
 
             return film;
         };
@@ -195,6 +289,21 @@ public class FilmDbStorageImpl implements FilmStorage {
 
         return Arrays.stream(likesString.split(","))
                 .map(Long::parseLong)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Director> parseDirectors(String directorsString) {
+        if (Objects.isNull(directorsString)) {
+            return Collections.emptySet();
+        }
+
+        return Arrays.stream(directorsString.split(";"))
+                .map(directorIdAndName -> {
+                    String[] parts = directorIdAndName.split(",");
+                    final int directorId = Integer.parseInt(parts[0]);
+                    String directorName = parts[1];
+                    return new Director(directorId, directorName);
+                })
                 .collect(Collectors.toSet());
     }
 }

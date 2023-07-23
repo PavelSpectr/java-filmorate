@@ -34,8 +34,8 @@ public class Film {
 
     private Set<Genre> genres;
     private MpaRating mpa;
-
     private Set<Long> likes = new HashSet<>();
+    private Set<Director> directors;
 
     public int getLikesCount() {
         return likes.size();
