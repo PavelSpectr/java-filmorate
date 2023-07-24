@@ -65,6 +65,7 @@ public class ReviewDbStorageImpl implements ReviewStorage {
     private static final String DELETE_REVIEW_LIKES_QUERY = "DELETE FROM review_likes WHERE review_id = ? AND " +
             "user_id = ? AND is_positive = ?";
 
+    @Override
     public Review getReviewById(Long reviewId) {
         Optional<Review> review = jdbcTemplate.query(SELECT_REVIEW_BY_ID_QUERY, reviewRowMapper(), reviewId)
                 .stream()
@@ -78,6 +79,7 @@ public class ReviewDbStorageImpl implements ReviewStorage {
         return review.get();
     }
 
+    @Override
     public Review addReview(Review review) {
         try {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
@@ -97,39 +99,47 @@ public class ReviewDbStorageImpl implements ReviewStorage {
         }
     }
 
+    @Override
     public Review updateReview(Review review) {
         jdbcTemplate.update(UPDATE_REVIEW_QUERY, review.getContent(), review.getIsPositive(), review.getReviewId());
         return getReviewById(review.getReviewId());
     }
 
+    @Override
     public void deleteReview(Long reviewId) {
         getReviewById(reviewId);
         jdbcTemplate.update(DELETE_REVIEW_QUERY, reviewId);
     }
 
+    @Override
     public List<Review> getReviewsOfFilm(Long filmId, Long count) {
         return jdbcTemplate.query(SELECT_REVIEWS_OF_FILM_QUERY, reviewRowMapper(), filmId, count);
     }
 
+    @Override
     public List<Review> getReviews(Long count) {
         return jdbcTemplate.query(SELECT_ALL_REVIEWS_QUERY, reviewRowMapper(), count);
     }
 
+    @Override
     public void addLike(Long reviewId, Long userId) {
         jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, reviewId, userId, true);
         jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, reviewId);
     }
 
+    @Override
     public void addDislike(Long reviewId, Long userId) {
         jdbcTemplate.update(UPDATE_REVIEW_LIKES_QUERY, reviewId, userId, false);
         jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, reviewId);
     }
 
+    @Override
     public void removeLike(Long reviewId, Long userId) {
         jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, reviewId, userId, true);
         jdbcTemplate.update(UPDATE_REVIEW_USEFUL_MINUS_QUERY, reviewId);
     }
 
+    @Override
     public void removeDislike(Long reviewId, Long userId) {
         jdbcTemplate.update(DELETE_REVIEW_LIKES_QUERY, reviewId, userId, false);
         jdbcTemplate.update(UPDATE_REVIEW_USEFUL_PLUS_QUERY, reviewId);
