@@ -15,7 +15,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping("/{reviewId}")
-    public Review getReviews(@PathVariable Long reviewId) {
+    public Review getReviewById(@PathVariable Long reviewId) {
         return reviewService.getReviewById(reviewId);
     }
 
@@ -35,7 +35,7 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<Review> getReviewsOfFilm(@RequestParam(defaultValue = "") Long filmId,
+    public List<Review> getReviews(@RequestParam(defaultValue = "") Long filmId,
                                          @RequestParam(defaultValue = "10") Long count) {
         return reviewService.getReviewsOfFilm(filmId, count);
     }
