@@ -105,4 +105,4 @@ is_positive boolean not null,
 primary key (review_id, user_id)
 );
 
-ALTER TABLE reviews ALTER COLUMN useful SET DEFAULT 0;
+alter table reviews alter COLUMN useful SET DEFAULT 0;

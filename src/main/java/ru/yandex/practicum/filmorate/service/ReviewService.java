@@ -58,7 +58,7 @@ public class ReviewService {
     public List<Review> getReviewsOfFilm(Long filmId, Long count) {
         List<Review> reviews;
         log.debug("+ getReviewsOfFilm: filmId={}, count={}", filmId, count);
-        if (filmId == null){
+        if (filmId == null) {
             reviews = reviewStorage.getReviews(count);
         } else {
             reviews = reviewStorage.getReviewsOfFilm(filmId, count);

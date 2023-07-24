@@ -111,7 +111,7 @@ public class ReviewDbStorageImpl implements ReviewStorage {
         return jdbcTemplate.query(SELECT_REVIEWS_OF_FILM_QUERY, reviewRowMapper(), filmId, count);
     }
 
-    public List<Review> getReviews(Long count){
+    public List<Review> getReviews(Long count) {
         return jdbcTemplate.query(SELECT_ALL_REVIEWS_QUERY, reviewRowMapper(), count);
     }
 
