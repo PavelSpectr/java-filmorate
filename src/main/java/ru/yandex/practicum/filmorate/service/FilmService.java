@@ -75,4 +75,18 @@ public class FilmService {
 
         return popularFilms;
     }
+
+    public List<Film> getFilmsByDirector(long directorId, String sortBy) {
+        log.debug("+ getFilmsByDirector: directorId={}", directorId);
+        List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
+        log.debug("- getFilmsByDirector: {}", films);
+        return films;
+    }
+
+    public List<Film> getFilmsBySearchQuery(String query, List<String> by) {
+        log.debug("+ getFilmsBySearchQuery: query={}, by={}", query, by);
+        List<Film> films = filmStorage.getFilmsBySearchQuery(query, by);
+        log.debug("- getFilmsBySearchQuery: {}", films);
+        return films;
+    }
 }

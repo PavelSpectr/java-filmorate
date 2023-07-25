@@ -33,11 +33,7 @@ public class Film {
     private Integer duration;
 
     private Set<Genre> genres;
-
-    // Евгения: это поле добавлено поскольку без него не проходят тесты, оставшаяся реализация в рамках другой задачи
     private Set<Director> directors = new HashSet<>();
     private MpaRating mpa;
-    // Евгения: мы убрали список лайков за ненадобностью, оставляем вместо него количество лайков,
-    // по ним будет проходить сортировка
     private int likesCount;
 }

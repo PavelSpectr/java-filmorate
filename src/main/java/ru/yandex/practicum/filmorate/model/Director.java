@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 
-// Евгения класс необходим для прохождения тестов, реализация остальных функций Режиссеров будет в рамках другой задачи
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
@@ -14,6 +13,6 @@ public class Director {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @NotBlank(message = "Имя режисера не должно быть пустым")
+    @NotBlank(message = "Имя не должно быть пустым")
     private String name;
 }
