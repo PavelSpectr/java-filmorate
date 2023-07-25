@@ -61,7 +61,7 @@ public class FilmDbStorageImpl implements FilmStorage {
             "GROUP BY films.id";
     //Евгения: поле со списком лайков убрано за ненадобностью, добавлено вычисляемое поле likes_count
     // todo при мерже с задачей по режиссерам в этот запрос также нужно будет добавить поле с режиссерами
-    private static final String SELECT_POPULAR_FILMS_QUERY_1 = "SELECT " +
+    private static final String SELECT_POPULAR_FILMS_QUERY_FIELDS = "SELECT " +
             "films.id, " +
             "films.name, " +
             "films.description, " +
@@ -72,16 +72,16 @@ public class FilmDbStorageImpl implements FilmStorage {
             "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
             "COUNT(DISTINCT(film_likes.user_id)) AS likes_count " +
             "FROM films ";
-    private static final String SELECT_POPULAR_FILMS_QUERY_GENRE =
+    private static final String SELECT_POPULAR_FILMS_QUERY_GENRE_FILTER =
             "JOIN film_genres AS fg ON films.id = fg.film_id AND fg.genre_id = ? ";
-    private static final String SELECT_POPULAR_FILMS_QUERY_2 =
+    private static final String SELECT_POPULAR_FILMS_QUERY_JOIN_TABLES =
             "LEFT JOIN film_genres AS fgl ON films.id = fgl.film_id " +
                     "LEFT JOIN genres ON fgl.genre_id = genres.id " +
                     "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
                     "LEFT JOIN film_likes ON films.id = film_likes.film_id ";
-    private static final String SELECT_POPULAR_FILMS_QUERY_YEAR =
+    private static final String SELECT_POPULAR_FILMS_QUERY_YEAR_FILTER =
             "WHERE EXTRACT(YEAR FROM films.release_date) = ? ";
-    private static final String SELECT_POPULAR_FILMS_QUERY_3 =
+    private static final String SELECT_POPULAR_FILMS_QUERY_LIMIT =
             "GROUP BY films.id " +
                     "ORDER BY likes_count DESC " +
                     "LIMIT ? ";
@@ -132,15 +132,15 @@ public class FilmDbStorageImpl implements FilmStorage {
     // из нескольких строковых костант
     @Override
     public List<Film> getPopularFilms(int count, Long genreId, Integer year) {
-        String query = SELECT_POPULAR_FILMS_QUERY_1;
+        String query = SELECT_POPULAR_FILMS_QUERY_FIELDS;
         if (genreId != null) {
-            query += SELECT_POPULAR_FILMS_QUERY_GENRE;
+            query += SELECT_POPULAR_FILMS_QUERY_GENRE_FILTER;
         }
-        query += SELECT_POPULAR_FILMS_QUERY_2;
+        query += SELECT_POPULAR_FILMS_QUERY_JOIN_TABLES;
         if (year != null) {
-            query += SELECT_POPULAR_FILMS_QUERY_YEAR;
+            query += SELECT_POPULAR_FILMS_QUERY_YEAR_FILTER;
         }
-        query += SELECT_POPULAR_FILMS_QUERY_3;
+        query += SELECT_POPULAR_FILMS_QUERY_LIMIT;
         if (genreId != null && year != null) {
             return jdbcTemplate.query(query, filmRowMapper(), genreId, year, count);
         }
