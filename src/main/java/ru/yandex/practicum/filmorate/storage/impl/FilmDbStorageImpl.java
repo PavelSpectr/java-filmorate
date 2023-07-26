@@ -73,6 +73,27 @@ public class FilmDbStorageImpl implements FilmStorage {
             "GROUP BY films.id " +
                     "ORDER BY likes_count DESC " +
                     "LIMIT ? ";
+    private static final String SELECT_COMMON_FILMS_BY_USER_ID_AND_FRIEND_ID_QUERY = "SELECT DISTINCT " +
+            "films.id, " +
+            "films.name, " +
+            "films.description, " +
+            "films.release_date, " +
+            "films.duration_minutes, " +
+            "films.mpa_rating_id, " +
+            "mpa.name AS mpa_rating_name, " +
+            "GROUP_CONCAT(genres.id || ',' || genres.name separator ';') AS genres, " +
+            "GROUP_CONCAT(directors.id || ',' || directors.name separator ';') AS directors, " +
+            "(SELECT COUNT(*) FROM film_likes WHERE film_id = films.id) AS likes_count " +
+            "FROM films " +
+            "INNER JOIN film_likes AS user_likes ON films.id = user_likes.film_id AND user_likes.user_id = ? " +
+            "INNER JOIN film_likes AS friend_likes ON films.id = friend_likes.film_id AND friend_likes.user_id = ? " +
+            "LEFT JOIN film_genres ON films.id = film_genres.film_id " +
+            "LEFT JOIN genres ON film_genres.genre_id = genres.id " +
+            "LEFT JOIN mpa_ratings AS mpa ON films.mpa_rating_id = mpa.id " +
+            "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
+            "LEFT JOIN directors ON film_directors.director_id = directors.id " +
+            "GROUP BY films.id " +
+            "ORDER BY likes_count DESC";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration_minutes = ?, mpa_rating_id = ? WHERE id = ?";
     private static final String INSERT_FILM_GENRES_QUERY = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
     private static final String INSERT_FILM_DIRECTORS_QUERY = "INSERT INTO film_directors (film_id, director_id) VALUES (?, ?)";
@@ -112,6 +133,11 @@ public class FilmDbStorageImpl implements FilmStorage {
     @Override
     public List<Film> getFilms() {
         return jdbcTemplate.query(BASE_QUERY + SELECT_ALL_FILMS_QUERY, filmRowMapper());
+    }
+
+    @Override
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        return jdbcTemplate.query(SELECT_COMMON_FILMS_BY_USER_ID_AND_FRIEND_ID_QUERY, filmRowMapper(), userId, friendId);
     }
 
     @Override
