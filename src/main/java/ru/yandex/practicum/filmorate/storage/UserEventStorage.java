@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface UserEventStorage {
     UserEvent getEventById(Long eventId);
+
     List<UserEvent> getEventsByUserId(Long userId);
+
     Long addEvent(UserEventType eventType, UserEventOperation operation, Long userId, Long entityId);
 }
