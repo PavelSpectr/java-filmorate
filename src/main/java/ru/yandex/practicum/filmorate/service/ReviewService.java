@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.UserEventOperation;
+import ru.yandex.practicum.filmorate.model.UserEventType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
+import ru.yandex.practicum.filmorate.storage.UserEventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
@@ -19,11 +22,16 @@ public class ReviewService {
 
     private final UserStorage userStorage;
 
-    public ReviewService(ReviewStorage reviewStorage, @Qualifier("filmDbStorage") FilmStorage filmStorage,
-                         @Qualifier("userDbStorage") UserStorage userStorage) {
+    private final UserEventStorage eventStorage;
+
+    public ReviewService(ReviewStorage reviewStorage,
+                         @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                         @Qualifier("userDbStorage") UserStorage userStorage,
+                         @Qualifier("userEventDbStorage") UserEventStorage eventStorage) {
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
         this.reviewStorage = reviewStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Review getReviewById(Long reviewId) {
@@ -38,6 +46,7 @@ public class ReviewService {
         filmStorage.getFilmById(review.getFilmId());
         userStorage.getUserById(review.getUserId());
         Review addedReview = reviewStorage.addReview(review);
+        eventStorage.addEvent(UserEventType.REVIEW, UserEventOperation.ADD, review.getUserId(), addedReview.getReviewId());
         log.debug("- addReview: {}", addedReview);
         return addedReview;
     }
@@ -45,13 +54,16 @@ public class ReviewService {
     public Review updateReview(Review review) {
         log.debug("+ updateReview: {}", review);
         Review updatedReview = reviewStorage.updateReview(review);
+        eventStorage.addEvent(UserEventType.REVIEW, UserEventOperation.UPDATE, updatedReview.getUserId(), updatedReview.getReviewId());
         log.debug("- addReview: {}", updatedReview);
         return updatedReview;
     }
 
     public void deleteReview(Long reviewId) {
         log.debug("+ deleteReview: reviewId={}", reviewId);
+        Long user_id = reviewStorage.getReviewById(reviewId).getUserId();
         reviewStorage.deleteReview(reviewId);
+        eventStorage.addEvent(UserEventType.REVIEW, UserEventOperation.REMOVE, user_id, reviewId);
         log.debug("+ deleteReview: reviewId={}", reviewId);
     }
 
