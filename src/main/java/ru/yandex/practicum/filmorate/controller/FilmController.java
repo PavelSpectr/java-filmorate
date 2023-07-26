@@ -34,13 +34,22 @@ public class FilmController {
         return filmService.getFilmById(filmId);
     }
 
-    // Евгения: согласно ТЗ добавила дополнительные параметры к эндпойнту
     @GetMapping("/popular")
     public List<Film> getMostPopularFilms(
             @RequestParam(defaultValue = "10") int count,
             @RequestParam(required = false) Long genreId,
             @RequestParam(required = false) Integer year) {
         return filmService.getMostPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable long directorId, @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<Film> getFilmsBySearchQuery(@RequestParam String query, @RequestParam List<String> by) {
+        return filmService.getFilmsBySearchQuery(query, by);
     }
 
     @PostMapping
