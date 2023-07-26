@@ -61,9 +61,9 @@ public class ReviewService {
 
     public void deleteReview(Long reviewId) {
         log.debug("+ deleteReview: reviewId={}", reviewId);
-        Long user_id = reviewStorage.getReviewById(reviewId).getUserId();
+        Long userId = reviewStorage.getReviewById(reviewId).getUserId();
         reviewStorage.deleteReview(reviewId);
-        eventStorage.addEvent(UserEventType.REVIEW, UserEventOperation.REMOVE, user_id, reviewId);
+        eventStorage.addEvent(UserEventType.REVIEW, UserEventOperation.REMOVE, userId, reviewId);
         log.debug("+ deleteReview: reviewId={}", reviewId);
     }
 
