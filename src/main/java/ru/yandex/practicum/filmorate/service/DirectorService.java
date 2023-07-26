@@ -27,7 +27,7 @@ public class DirectorService {
         return directors;
     }
 
-    public Director getDirectorById(int directorId) {
+    public Director getDirectorById(long directorId) {
         log.debug("+ getDirectorById: directorId={}", directorId);
         Director director = directorStorage.getDirectorById(directorId);
         log.debug("- getDirectorById: {}", director);
@@ -48,7 +48,7 @@ public class DirectorService {
         return updatedDirector;
     }
 
-    public void deleteDirector(int directorId) {
+    public void deleteDirector(long directorId) {
         log.debug("+ deleteDirector: directorId={}", directorId);
         directorStorage.deleteDirector(directorId);
         log.debug("- deleteDirector");
