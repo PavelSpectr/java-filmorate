@@ -75,7 +75,7 @@ public class ReviewService {
         } else {
             reviews = reviewStorage.getReviewsOfFilm(filmId, count);
         }
-        log.debug("+ getReviewsOfFilm: ", reviews);
+        log.debug("+ getReviewsOfFilm: {}", reviews);
         return reviews;
     }
 
