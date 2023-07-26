@@ -40,6 +40,13 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        log.debug("+ getCommonFilms: userId={}, friendId={}", userId, friendId);
+        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        log.debug("- getCommonFilms: {}", films);
+        return films;
+    }
+
     public Film addFilm(Film film) {
         log.debug("+ addFilm: {}", film);
         Film addedFilm = filmStorage.getFilmById(filmStorage.addFilm(film));
