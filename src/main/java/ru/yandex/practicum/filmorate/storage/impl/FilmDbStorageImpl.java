@@ -47,10 +47,12 @@ public class FilmDbStorageImpl implements FilmStorage {
                     "LEFT JOIN film_likes ON films.id = film_likes.film_id " +
                     "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
                     "LEFT JOIN directors ON film_directors.director_id = directors.id ";
+
     private static final String SELECT_FILMS_BY_USER_ID_LIKE =
             "JOIN film_likes AS fl ON films.id = fl.film_id AND fl.user_id = ? " +
             "GROUP BY films.id " +
             "ORDER BY likes_count DESC";
+
     private static final String SELECT_FILM_BY_ID_QUERY = "WHERE films.id = ? GROUP BY films.id";
     private static final String SELECT_ALL_FILMS_QUERY = "GROUP BY films.id";
     private static final String SELECT_FILM_BY_DIRECTOR_SORT_BY_LIKES_QUERY =
