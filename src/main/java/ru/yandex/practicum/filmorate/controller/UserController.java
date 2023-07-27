@@ -79,7 +79,7 @@ public class UserController {
 
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable("id") Long userId) {
-        log.info("Ïîëó÷åí GET-çàïðîñ ê ýíäïîèíòó: '/users' íà ïîëó÷åíèå ðåêîììåíäàöèé ïîëüçîâàòåëþ ñ ID={}", userId);
+        log.info("Получен GET-запрос к эндпоинту: '/users' на получение рекоммендаций пользователю с ID={}", userId);
         return filmService.getRecommendations(userId);
     }
 }

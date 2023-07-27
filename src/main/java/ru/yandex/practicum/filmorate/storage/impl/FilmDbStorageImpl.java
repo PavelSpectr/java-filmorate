@@ -48,7 +48,7 @@ public class FilmDbStorageImpl implements FilmStorage {
                     "LEFT JOIN film_directors ON films.id = film_directors.film_id " +
                     "LEFT JOIN directors ON film_directors.director_id = directors.id ";
     private static final String SELECT_FILMS_BY_USER_ID_LIKE =
-            "JOIN film_likes AS fl ON films.id = fl.film_id AND fl.user_id = ? "+
+            "JOIN film_likes AS fl ON films.id = fl.film_id AND fl.user_id = ? " +
             "GROUP BY films.id " +
             "ORDER BY likes_count DESC";
     private static final String SELECT_FILM_BY_ID_QUERY = "WHERE films.id = ? GROUP BY films.id";
@@ -107,11 +107,16 @@ public class FilmDbStorageImpl implements FilmStorage {
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
     private static final String INSERT_FILM_LIKES_QUERY = "INSERT INTO film_likes (user_id, film_id) VALUES (?, ?)";
     private static final String DELETE_FILM_LIKES_QUERY = "DELETE FROM film_likes WHERE user_id = ? AND film_id = ?";
-
     private static final String FILM_LIKES_EXIST_QUERY = "SELECT " +
             "film_likes.film_id " +
             "FROM film_likes " +
             "WHERE film_likes.film_id = ? AND film_likes.user_id = ?";
+    private static final String SELECT_MAX_INTERSECTION_USER_ID_QUERY = "SELECT fl1.user_id AS first_user, fl2.user_id AS second_user, COUNT(*) AS intersection_count " +
+            "FROM film_likes fl1 " +
+            "JOIN film_likes fl2 ON fl1.film_id = fl2.film_id AND fl1.user_id <> fl2.user_id AND fl1.user_id = ?" +
+            "GROUP BY fl1.user_id, fl2.user_id " +
+            "ORDER BY intersection_count DESC " +
+            "LIMIT 1";
 
     @Override
     public Film getFilmById(Long filmId) {
@@ -298,13 +303,8 @@ public class FilmDbStorageImpl implements FilmStorage {
         return filmsBySearchQuery;
     }
 
-    private Long getMaxIntersectionUserId(Long userId){
-        String sql = "SELECT fl1.user_id AS first_user, fl2.user_id AS second_user, COUNT(*) AS intersection_count " +
-                "FROM film_likes fl1 " +
-                "JOIN film_likes fl2 ON fl1.film_id = fl2.film_id AND fl1.user_id <> fl2.user_id AND fl1.user_id = ?" +
-                "GROUP BY fl1.user_id, fl2.user_id " +
-                "ORDER BY intersection_count DESC " +
-                "LIMIT 1";
+    private Long getMaxIntersectionUserId(Long userId) {
+        String sql = SELECT_MAX_INTERSECTION_USER_ID_QUERY;
         Optional<Long> maxIntersectionUserId = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("second_user"), userId)
                 .stream()
                 .findFirst();

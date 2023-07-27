@@ -106,7 +106,9 @@ public class FilmService {
     }
 
     public List<Film> getRecommendations(Long userId) {
+        log.debug("+ getRecommendations: userId={}", userId);
         List<Film> films = filmStorage.getRecommendations(userId);
+        log.debug("- getRecommendations: userId={}", userId);
         return films;
     }
 }
