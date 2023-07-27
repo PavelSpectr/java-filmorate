@@ -5,22 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.UserEventOperation;
+import ru.yandex.practicum.filmorate.model.UserEventType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserEventStorage;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserEventStorage eventStorage;
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userEventDbStorage") UserEventStorage eventStorage) {
         this.filmStorage = filmStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Film getFilmById(Long filmId) {
@@ -34,6 +37,13 @@ public class FilmService {
         log.debug("+ getFilms");
         List<Film> films = filmStorage.getFilms();
         log.debug("- getFilms: {}", films);
+        return films;
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        log.debug("+ getCommonFilms: userId={}, friendId={}", userId, friendId);
+        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        log.debug("- getCommonFilms: {}", films);
         return films;
     }
 
@@ -60,25 +70,43 @@ public class FilmService {
     public void addLike(long filmId, long userId) {
         log.debug("+ addLike: filmId={}, userId={}", filmId, userId);
         filmStorage.addLike(filmId, userId);
-        log.debug("- addLike: likes={}", getFilmById(filmId).getLikes());
+        eventStorage.addEvent(UserEventType.LIKE, UserEventOperation.ADD, userId, filmId);
+        log.debug("- addLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 
     public void removeLike(long filmId, long userId) {
         log.debug("+ removeLike filmId={}, userId={}", filmId, userId);
         filmStorage.removeLike(filmId, userId);
-        log.debug("- removeLike: likes={}", getFilmById(filmId).getLikes());
+        eventStorage.addEvent(UserEventType.LIKE, UserEventOperation.REMOVE, userId, filmId);
+        log.debug("- removeLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 
-    public List<Film> getMostPopularFilms(int count) {
+    public List<Film> getMostPopularFilms(int count, Long genreId, Integer year) {
         log.debug("+ getMostPopularFilms: {}", count);
 
-        List<Film> popularFilms = getFilms().stream()
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(Film::getLikesCount)))
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> popularFilms = filmStorage.getPopularFilms(count, genreId, year);
 
         log.debug("- getMostPopularFilms: {}", popularFilms);
 
         return popularFilms;
+    }
+
+    public List<Film> getFilmsByDirector(long directorId, String sortBy) {
+        log.debug("+ getFilmsByDirector: directorId={}", directorId);
+        List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
+        log.debug("- getFilmsByDirector: {}", films);
+        return films;
+    }
+
+    public List<Film> getFilmsBySearchQuery(String query, List<String> by) {
+        log.debug("+ getFilmsBySearchQuery: query={}, by={}", query, by);
+        List<Film> films = filmStorage.getFilmsBySearchQuery(query, by);
+        log.debug("- getFilmsBySearchQuery: {}", films);
+        return films;
+    }
+
+    public List<Film> getRecommendations(Long userId) {
+        List<Film> films = filmStorage.getRecommendations(userId);
+        return films;
     }
 }

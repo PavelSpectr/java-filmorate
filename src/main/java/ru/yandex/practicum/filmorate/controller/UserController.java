@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -22,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
 
     @GetMapping
     public List<User> getUsers() {
@@ -43,6 +47,11 @@ public class UserController {
         return userService.getCommonFriends(userId, friendId);
     }
 
+    @GetMapping("/{userId}/feed")
+    public List<UserEvent> getEventsByUserId(@PathVariable Long userId) {
+        return userService.getEventsByUserId(userId);
+    }
+
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
@@ -53,6 +62,11 @@ public class UserController {
         return userService.updateUser(user);
     }
 
+    @DeleteMapping("/{userId}")
+    public void delete(@PathVariable("userId") Long userId) {
+        userService.deleteUser(userId);
+    }
+
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         userService.addFriend(userId, friendId);
@@ -61,5 +75,11 @@ public class UserController {
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void removeFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         userService.removeFriend(userId, friendId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable("id") Long userId) {
+        log.info("Ïîëó÷åí GET-çàïðîñ ê ýíäïîèíòó: '/users' íà ïîëó÷åíèå ðåêîììåíäàöèé ïîëüçîâàòåëþ ñ ID={}", userId);
+        return filmService.getRecommendations(userId);
     }
 }

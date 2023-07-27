@@ -9,6 +9,10 @@ public interface FilmStorage {
 
     List<Film> getFilms();
 
+    List<Film> getCommonFilms(long userId, long friendId);
+
+    List<Film> getPopularFilms(int count, Long genreId, Integer year);
+
     Long addFilm(Film film);
 
     Long updateFilm(Film film);
@@ -18,4 +22,10 @@ public interface FilmStorage {
     void addLike(long filmId, long userId);
 
     void removeLike(long filmId, long userId);
+
+    List<Film> getFilmsByDirector(long directorId, String sortBy);
+
+    List<Film> getFilmsBySearchQuery(String query, List<String> by);
+
+    List<Film> getRecommendations(Long userId);
 }
