@@ -251,6 +251,9 @@ public class FilmDbStorageImpl implements FilmStorage {
 
     @Override
     public void addLike(long filmId, long userId) {
+        if (filmLikeExist(filmId, userId)) {
+            return;
+        }
         jdbcTemplate.update(INSERT_FILM_LIKES_QUERY, userId, filmId);
     }
 
