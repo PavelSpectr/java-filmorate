@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.UserEventOperation;
 import ru.yandex.practicum.filmorate.model.UserEventType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserEventStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserEventStorage eventStorage;
+
+    private final UserStorage userStorage;
 
     public Film getFilmById(Long filmId) {
         return filmStorage.getFilmById(filmId);
@@ -27,6 +30,7 @@ public class FilmService {
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
+        userStorage.getUserById(userId);
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
@@ -43,12 +47,14 @@ public class FilmService {
     }
 
     public void addLike(long filmId, long userId) {
+        userStorage.getUserById(userId);
         filmStorage.addLike(filmId, userId);
         UserEvent userEvent = new UserEvent(UserEventType.LIKE, UserEventOperation.ADD, userId, filmId);
         eventStorage.addEvent(userEvent);
     }
 
     public void removeLike(long filmId, long userId) {
+        userStorage.getUserById(userId);
         filmStorage.removeLike(filmId, userId);
         UserEvent userEvent = new UserEvent(UserEventType.LIKE, UserEventOperation.REMOVE, userId, filmId);
         eventStorage.addEvent(userEvent);
@@ -67,6 +73,7 @@ public class FilmService {
     }
 
     public List<Film> getRecommendations(Long userId) {
+        userStorage.getUserById(userId);
         return filmStorage.getRecommendations(userId);
     }
 }
