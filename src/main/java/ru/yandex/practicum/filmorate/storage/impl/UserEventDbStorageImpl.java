@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.model.UserEventOperation;
 import ru.yandex.practicum.filmorate.model.UserEventType;
@@ -14,47 +13,16 @@ import ru.yandex.practicum.filmorate.storage.UserEventStorage;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-@Component("userEventDbStorage")
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class UserEventDbStorageImpl implements UserEventStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final String SELECT_USER_EVENT_BY_ID_QUERY = "SELECT " +
-            "events.id, " +
-            "events.user_id, " +
-            "events.entity_id, " +
-            "events.event_type, " +
-            "events.event_operation, " +
-            "events.created_at " +
-            "FROM user_events AS events " +
-            "WHERE events.id = ?";
-    private static final String SELECT_ALL_USER_EVENTS_QUERY = "SELECT " +
-            "events.id, " +
-            "events.user_id, " +
-            "events.entity_id, " +
-            "events.event_type, " +
-            "events.event_operation, " +
-            "events.created_at " +
+    private static final String SELECT_ALL_USER_EVENTS_QUERY = "SELECT events.* " +
             "FROM user_events AS events " +
             "WHERE events.user_id = ? " +
             "ORDER BY events.id";
-
-    @Override
-    public UserEvent getEventById(Long eventId) {
-        Optional<UserEvent> event = jdbcTemplate.query(SELECT_USER_EVENT_BY_ID_QUERY, eventRowMapper(), eventId)
-                .stream()
-                .findFirst();
-
-        if (event.isEmpty()) {
-            String errorMessage = "Событие #" + eventId + " не найдено.";
-            log.error(errorMessage);
-            throw new NotFoundException(errorMessage);
-        }
-
-        return event.get();
-    }
 
     @Override
     public List<UserEvent> getEventsByUserId(Long userId) {
@@ -62,17 +30,17 @@ public class UserEventDbStorageImpl implements UserEventStorage {
     }
 
     @Override
-    public Long addEvent(UserEventType eventType, UserEventOperation operation, Long userId, Long entityId) {
+    public Long addEvent(UserEvent userEvent) {
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                 .withTableName("user_events")
                 .usingGeneratedKeyColumns("id");
 
         Map<String, String> params = Map.of(
-                "user_id", userId.toString(),
-                "entity_id", entityId.toString(),
-                "event_type", eventType.toString(),
-                "event_operation", operation.toString(),
+                "user_id", userEvent.getUserId().toString(),
+                "entity_id", userEvent.getEntityId().toString(),
+                "event_type", userEvent.getEventType().toString(),
+                "event_operation", userEvent.getOperation().toString(),
                 "created_at", new java.sql.Timestamp(new java.util.Date().getTime()).toString()
         );
 

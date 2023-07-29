@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
@@ -10,47 +8,27 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import java.util.List;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class DirectorService {
-
     private final DirectorStorage directorStorage;
 
-    @Autowired
-    public DirectorService(@Qualifier("directorDbStorage") DirectorStorage directorStorage) {
-        this.directorStorage = directorStorage;
-    }
-
     public List<Director> getDirectors() {
-        log.debug("+ getDirectors");
-        List<Director> directors = directorStorage.getDirectors();
-        log.debug("- getDirectors: {}", directors);
-        return directors;
+        return directorStorage.getDirectors();
     }
 
     public Director getDirectorById(long directorId) {
-        log.debug("+ getDirectorById: directorId={}", directorId);
-        Director director = directorStorage.getDirectorById(directorId);
-        log.debug("- getDirectorById: {}", director);
-        return director;
+        return directorStorage.getDirectorById(directorId);
     }
 
     public Director addDirector(Director director) {
-        log.debug("+ addDirector: {}", director);
-        Director addedDirector = directorStorage.getDirectorById(directorStorage.addDirector(director));
-        log.debug("- addDirector: {}", addedDirector);
-        return addedDirector;
+        return directorStorage.getDirectorById(directorStorage.addDirector(director));
     }
 
     public Director updateDirector(Director director) {
-        log.debug("+ updateDirector: {}", director);
-        Director updatedDirector = directorStorage.getDirectorById(directorStorage.updateDirector(director));
-        log.debug("- updateDirector: {}", updatedDirector);
-        return updatedDirector;
+        return directorStorage.getDirectorById(directorStorage.updateDirector(director));
     }
 
     public void deleteDirector(long directorId) {
-        log.debug("+ deleteDirector: directorId={}", directorId);
         directorStorage.deleteDirector(directorId);
-        log.debug("- deleteDirector");
     }
 }

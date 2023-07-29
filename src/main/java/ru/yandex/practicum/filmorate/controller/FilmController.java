@@ -26,12 +26,18 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
-        return filmService.getFilms();
+        log.info("+ getFilms");
+        List<Film> films = filmService.getFilms();
+        log.info("- getFilms: {}", films);
+        return films;
     }
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable Long filmId) {
-        return filmService.getFilmById(filmId);
+        log.info("+ getFilmById: filmId={}", filmId);
+        Film film = filmService.getFilmById(filmId);
+        log.info("- getFilmById: {}", film);
+        return film;
     }
 
     @GetMapping("/popular")
@@ -39,46 +45,70 @@ public class FilmController {
             @RequestParam(defaultValue = "10") int count,
             @RequestParam(required = false) Long genreId,
             @RequestParam(required = false) Integer year) {
-        return filmService.getMostPopularFilms(count, genreId, year);
+        log.info("+ getMostPopularFilms: {}", count);
+        List<Film> popularFilms = filmService.getMostPopularFilms(count, genreId, year);
+        log.info("- getMostPopularFilms: {}", popularFilms);
+        return popularFilms;
     }
 
     @GetMapping("/director/{directorId}")
     public List<Film> getFilmsByDirector(@PathVariable long directorId, @RequestParam String sortBy) {
-        return filmService.getFilmsByDirector(directorId, sortBy);
+        log.info("+ getFilmsByDirector: directorId={}", directorId);
+        List<Film> films = filmService.getFilmsByDirector(directorId, sortBy);
+        log.info("- getFilmsByDirector: {}", films);
+        return films;
     }
 
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam int userId, @RequestParam int friendId) {
-        return filmService.getCommonFilms(userId, friendId);
+        log.info("+ getCommonFilms: userId={}, friendId={}", userId, friendId);
+        List<Film> films = filmService.getCommonFilms(userId, friendId);
+        log.info("- getCommonFilms: {}", films);
+        return films;
     }
 
     @GetMapping("/search")
     public List<Film> getFilmsBySearchQuery(@RequestParam String query, @RequestParam List<String> by) {
-        return filmService.getFilmsBySearchQuery(query, by);
+        log.info("+ getFilmsBySearchQuery: query={}, by={}", query, by);
+        List<Film> films = filmService.getFilmsBySearchQuery(query, by);
+        log.info("- getFilmsBySearchQuery: {}", films);
+        return films;
     }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        return filmService.addFilm(film);
+        log.info("+ addFilm: {}", film);
+        Film addedFilm = filmService.addFilm(film);
+        log.info("- addFilm: {}", addedFilm);
+        return addedFilm;
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmService.updateFilm(film);
+        log.info("+ updateFilm: {}", film);
+        Film updatedFilm = filmService.updateFilm(film);
+        log.info("- updateFilm: {}", updatedFilm);
+        return updatedFilm;
     }
 
     @DeleteMapping("/{filmId}")
-    public void delete(@PathVariable("filmId") Long filmId) {
+    public void deleteFilm(@PathVariable("filmId") Long filmId) {
+        log.info("+ deleteFilm: filmId={}", filmId);
         filmService.deleteFilm(filmId);
+        log.info("- deleteFilm");
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("+ addLike: filmId={}, userId={}", filmId, userId);
         filmService.addLike(filmId, userId);
+        log.info("- addLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        log.info("+ removeLike filmId={}, userId={}", filmId, userId);
         filmService.removeLike(filmId, userId);
+        log.info("- removeLike: likesCount={}", getFilmById(filmId).getLikesCount());
     }
 }

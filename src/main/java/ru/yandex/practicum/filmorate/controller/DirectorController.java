@@ -25,26 +25,40 @@ public class DirectorController {
 
     @GetMapping
     public List<Director> getDirectors() {
-        return directorService.getDirectors();
+        log.info("+ getDirectors");
+        List<Director> directors = directorService.getDirectors();
+        log.info("- getDirectors: {}", directors);
+        return directors;
     }
 
     @GetMapping("/{directorId}")
     public Director getDirectorById(@PathVariable long directorId) {
-        return directorService.getDirectorById(directorId);
+        log.info("+ getDirectorById: directorId={}", directorId);
+        Director director = directorService.getDirectorById(directorId);
+        log.info("- getDirectorById: {}", director);
+        return director;
     }
 
     @PostMapping
     public Director addDirector(@Valid @RequestBody Director director) {
-        return directorService.addDirector(director);
+        log.info("+ addDirector: {}", director);
+        Director addedDirector = directorService.addDirector(director);
+        log.info("- addDirector: {}", addedDirector);
+        return addedDirector;
     }
 
     @PutMapping
     public Director updateDirector(@Valid @RequestBody Director director) {
-        return directorService.updateDirector(director);
+        log.info("+ updateDirector: {}", director);
+        Director updatedDirector = directorService.updateDirector(director);
+        log.info("- updateDirector: {}", updatedDirector);
+        return updatedDirector;
     }
 
     @DeleteMapping("/{directorId}")
     public void deleteDirector(@PathVariable long directorId) {
+        log.info("+ deleteDirector: directorId={}", directorId);
         directorService.deleteDirector(directorId);
+        log.info("- deleteDirector");
     }
 }
