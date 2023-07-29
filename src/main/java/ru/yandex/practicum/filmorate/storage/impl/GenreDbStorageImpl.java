@@ -17,8 +17,8 @@ import java.util.Optional;
 @Slf4j
 public class GenreDbStorageImpl implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final String SELECT_GENRE_BY_ID_QUERY = "SELECT genres.id, genres.name FROM genres WHERE id = ?";
-    private static final String SELECT_ALL_GENRES_QUERY = "SELECT genres.id, genres.name FROM genres";
+    private static final String SELECT_GENRE_BY_ID_QUERY = "SELECT * FROM genres WHERE id = ?";
+    private static final String SELECT_ALL_GENRES_QUERY = "SELECT * FROM genres";
 
     @Override
     public Genre getGenreById(Long genreId) {

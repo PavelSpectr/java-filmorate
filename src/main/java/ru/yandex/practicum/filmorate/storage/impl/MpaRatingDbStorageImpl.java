@@ -17,8 +17,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MpaRatingDbStorageImpl implements MpaRatingStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final String SELECT_MPA_RATING_BY_ID_QUERY = "SELECT mpa_ratings.id, mpa_ratings.name FROM mpa_ratings WHERE id = ?";
-    private static final String SELECT_ALL_MPA_RATINGS_QUERY = "SELECT mpa_ratings.id, mpa_ratings.name FROM mpa_ratings";
+    private static final String SELECT_MPA_RATING_BY_ID_QUERY = "SELECT * FROM mpa_ratings WHERE id = ?";
+    private static final String SELECT_ALL_MPA_RATINGS_QUERY = "SELECT * FROM mpa_ratings";
 
     @Override
     public MpaRating getMpaRatingById(Long mpaRatingId) {

@@ -14,15 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Component("directorDbStorage")
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class DirectorDbStorageImpl implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final String SELECT_DIRECTOR_BY_ID_QUERY = "SELECT directors.id, directors.name" +
-            " FROM directors WHERE id = ?";
-    private static final String SELECT_ALL_DIRECTORS_QUERY = "SELECT directors.id, directors.name" +
-            " FROM directors";
+    private static final String SELECT_DIRECTOR_BY_ID_QUERY = "SELECT * FROM directors WHERE id = ?";
+    private static final String SELECT_ALL_DIRECTORS_QUERY = "SELECT * FROM directors";
     private static final String UPDATE_DIRECTOR_QUERY = "UPDATE directors SET name = ? WHERE id = ?";
     private static final String DELETE_DIRECTOR_QUERY = "DELETE FROM directors WHERE id = ?";
 

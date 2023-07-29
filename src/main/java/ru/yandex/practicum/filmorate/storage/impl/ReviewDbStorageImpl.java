@@ -22,35 +22,21 @@ import java.util.Optional;
 public class ReviewDbStorageImpl implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String SELECT_REVIEW_BY_ID_QUERY = "SELECT review_id," +
-            "content," +
-            "is_positive," +
-            "user_id," +
-            "film_id," +
-            "useful " +
-            "FROM reviews WHERE review_id = ?";
+    private static final String SELECT_REVIEW_BY_ID_QUERY = "SELECT * FROM reviews WHERE review_id = ?";
 
     private static final String UPDATE_REVIEW_QUERY = "UPDATE reviews SET content = ?, is_positive = ? " +
             " WHERE review_id = ?";
 
     private static final String DELETE_REVIEW_QUERY = "DELETE FROM reviews WHERE review_id = ?";
 
-    private static final String SELECT_REVIEWS_OF_FILM_QUERY = "SELECT review_id," +
-            "content," +
-            "is_positive," +
-            "user_id," +
-            "film_id," +
-            "useful FROM reviews " +
+    private static final String SELECT_REVIEWS_OF_FILM_QUERY = "SELECT * " +
+            "FROM reviews " +
             "WHERE film_id = ? " +
             "ORDER BY useful DESC " +
             "LIMIT ?";
 
-    private static final String SELECT_ALL_REVIEWS_QUERY = "SELECT review_id," +
-            "content," +
-            "is_positive," +
-            "user_id," +
-            "film_id," +
-            "useful FROM reviews " +
+    private static final String SELECT_ALL_REVIEWS_QUERY = "SELECT * " +
+            "FROM reviews " +
             "ORDER BY useful DESC " +
             "LIMIT ?";
 
