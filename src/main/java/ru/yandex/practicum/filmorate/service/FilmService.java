@@ -1,84 +1,78 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.model.UserEventOperation;
+import ru.yandex.practicum.filmorate.model.UserEventType;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserEventStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class FilmService {
-
     private final FilmStorage filmStorage;
+    private final UserEventStorage eventStorage;
 
-    @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
-    }
+    private final UserStorage userStorage;
 
     public Film getFilmById(Long filmId) {
-        log.debug("+ getFilmById: filmId={}", filmId);
-        Film film = filmStorage.getFilmById(filmId);
-        log.debug("- getFilmById: {}", film);
-        return film;
+        return filmStorage.getFilmById(filmId);
     }
 
     public List<Film> getFilms() {
-        log.debug("+ getFilms");
-        List<Film> films = filmStorage.getFilms();
-        log.debug("- getFilms: {}", films);
-        return films;
+        return filmStorage.getFilms();
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        userStorage.getUserById(userId);
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 
     public Film addFilm(Film film) {
-        log.debug("+ addFilm: {}", film);
-        Film addedFilm = filmStorage.getFilmById(filmStorage.addFilm(film));
-        log.debug("- addFilm: {}", addedFilm);
-        return addedFilm;
+        return filmStorage.getFilmById(filmStorage.addFilm(film));
     }
 
     public Film updateFilm(Film film) {
-        log.debug("+ updateFilm: {}", film);
-        Film updatedFilm = filmStorage.getFilmById(filmStorage.updateFilm(film));
-        log.debug("- updateFilm: {}", updatedFilm);
-        return updatedFilm;
+        return filmStorage.getFilmById(filmStorage.updateFilm(film));
     }
 
     public void deleteFilm(Long filmId) {
-        log.debug("+ deleteFilm: filmId={}", filmId);
         filmStorage.deleteFilm(filmId);
-        log.debug("- deleteFilm");
     }
 
     public void addLike(long filmId, long userId) {
-        log.debug("+ addLike: filmId={}, userId={}", filmId, userId);
+        userStorage.getUserById(userId);
         filmStorage.addLike(filmId, userId);
-        log.debug("- addLike: likes={}", getFilmById(filmId).getLikes());
+        UserEvent userEvent = new UserEvent(UserEventType.LIKE, UserEventOperation.ADD, userId, filmId);
+        eventStorage.addEvent(userEvent);
     }
 
     public void removeLike(long filmId, long userId) {
-        log.debug("+ removeLike filmId={}, userId={}", filmId, userId);
+        userStorage.getUserById(userId);
         filmStorage.removeLike(filmId, userId);
-        log.debug("- removeLike: likes={}", getFilmById(filmId).getLikes());
+        UserEvent userEvent = new UserEvent(UserEventType.LIKE, UserEventOperation.REMOVE, userId, filmId);
+        eventStorage.addEvent(userEvent);
     }
 
-    public List<Film> getMostPopularFilms(int count) {
-        log.debug("+ getMostPopularFilms: {}", count);
+    public List<Film> getMostPopularFilms(int count, Long genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year);
+    }
 
-        List<Film> popularFilms = getFilms().stream()
-                .sorted(Collections.reverseOrder(Comparator.comparingInt(Film::getLikesCount)))
-                .limit(count)
-                .collect(Collectors.toList());
+    public List<Film> getFilmsByDirector(long directorId, String sortBy) {
+        return filmStorage.getFilmsByDirector(directorId, sortBy);
+    }
 
-        log.debug("- getMostPopularFilms: {}", popularFilms);
+    public List<Film> getFilmsBySearchQuery(String query, List<String> by) {
+        return filmStorage.getFilmsBySearchQuery(query, by);
+    }
 
-        return popularFilms;
+    public List<Film> getRecommendations(Long userId) {
+        userStorage.getUserById(userId);
+        return filmStorage.getRecommendations(userId);
     }
 }

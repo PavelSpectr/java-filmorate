@@ -19,28 +19,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component("userDbStorage")
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class UserDbStorageImpl implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private static final String SELECT_USER_BY_ID_QUERY = "SELECT " +
-            "users.id, " +
-            "users.email, " +
-            "users.login, " +
-            "users.name, " +
-            "users.birthday, " +
+    private static final String SELECT_USER_BY_ID_QUERY = "SELECT users.*, " +
             "GROUP_CONCAT(friendships.to_user_id separator ',') AS friend_ids " +
             "FROM users " +
             "LEFT JOIN friendships ON users.id = friendships.from_user_id " +
             "WHERE users.id = ?" +
             "GROUP BY users.id";
-    private static final String SELECT_ALL_USERS_QUERY = "SELECT " +
-            "users.id, " +
-            "users.email, " +
-            "users.login, " +
-            "users.name, " +
-            "users.birthday, " +
+    private static final String SELECT_ALL_USERS_QUERY = "SELECT users.*, " +
             "GROUP_CONCAT(friendships.to_user_id separator ',') AS friend_ids " +
             "FROM users " +
             "LEFT JOIN friendships ON users.id = friendships.from_user_id " +
