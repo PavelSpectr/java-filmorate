@@ -3,7 +3,7 @@
 <a href="https://github.com/PavelSpectr/java-filmorate"><strong>GIT-Project</strong></a>
     <br/>
     </p>
-    <h3 align="center">Yandex Practicum Team:</h3>
+    <h3 align="center">Team:</h3>
 <p align="center">
     Евгения Вершинина
     <br/>
